@@ -1,0 +1,47 @@
+/*
+ * Styles extraits de index.html
+ */
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 250px;
+    max-height: 250px;
+}
+.chart-container-bar {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 300px;
+    max-height: 300px;
+}
+@media (min-width: 768px) {
+    .chart-container {
+        height: 300px;
+        max-height: 300px;
+    }
+    .chart-container-bar {
+        height: 300px;
+        max-height: 300px;
+    }
+}
+.tab-btn.active {
+    border-bottom-color: #4f46e5; /* indigo-600 */
+    color: #4f46e5;
+    font-weight: 600;
+}
+.step-btn.active {
+    background-color: #4f46e5; /* indigo-600 */
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.step-btn {
+    transition: all 0.2s ease-in-out;
+}
+.accordion-content {
+    transition: max-height 0.3s ease-out;
+}
