@@ -420,6 +420,17 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+  const isLocalhost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  const websiteId = isLocalhost
+    ? "c6343268-9f02-4552-a745-b1dccd5633a7"
+    : "5e021b96-2f35-4c52-98f1-ba6ec6e08c06";
+  const script = document.createElement("script");
+  script.defer = true;
+  script.src = "https://stats.maelg.com/script.js";
+  script.setAttribute("data-website-id", websiteId);
+  document.body.appendChild(script);
+</script>
 </body>
 
 </html>
