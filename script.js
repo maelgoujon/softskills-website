@@ -4,36 +4,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initCharts = () => {
         const automationCtx = document.getElementById('automationChart').getContext('2d');
+    // Prévision linéaire jusqu'en 2030
+    const years = [2020, 2025, 2030];
+    // Calcul de la tendance linéaire pour chaque type de tâche
+    // Tâches Humaines : 2020=71, 2025=50
+    // Tâches Automatisées : 2020=29, 2025=50
+    // Slope = (y2-y1)/(x2-x1)
+    const humanSlope = (50-71)/(2025-2020); // -21/5 = -4.2 par an
+    const autoSlope = (50-29)/(2025-2020); // 21/5 = 4.2 par an
+    const humanData = years.map(y => Math.round(71 + (y-2020)*humanSlope));
+    const autoData = years.map(y => Math.round(29 + (y-2020)*autoSlope));
+
+        // Pour chaque dataset, on sépare la partie réelle (2020-2025) et la projection (2025-2035)
+        function buildSegmentStyles(data, color) {
+            // 0:2020, 1:2025, 2:2030
+            return {
+                borderColor: color,
+                backgroundColor: color.replace('1)', '0.1)'),
+                fill: false,
+                tension: 0.3,
+                pointRadius: 5,
+                pointBackgroundColor: color,
+                segment: {
+                    borderDash: ctx => {
+                        // ctx.p0DataIndex: index du point de départ du segment
+                        // On veut du plein pour 2020-2025 (0-1), pointillé après (1-2, 2-3)
+                        return ctx.p0DataIndex < 1 ? [] : [8, 6];
+                    }
+                }
+            };
+        }
+
         new Chart(automationCtx, {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: ['2020', '2025 (Projection)'],
+                labels: years.map(y => y === 2030 ? '2030 (Projection)' : y.toString()),
                 datasets: [
                     {
                         label: 'Tâches Humaines',
-                        data: [71, 48],
-                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
-                        borderColor: 'rgba(79, 70, 229, 1)',
-                        borderWidth: 1
+                        data: humanData,
+                        ...buildSegmentStyles(humanData, 'rgba(79, 70, 229, 1)')
                     },
                     {
                         label: 'Tâches Automatisées',
-                        data: [29, 52],
-                        backgroundColor: 'rgba(199, 210, 254, 0.7)',
-                        borderColor: 'rgba(199, 210, 254, 1)',
-                        borderWidth: 1
+                        data: autoData,
+                        ...buildSegmentStyles(autoData, 'rgba(199, 210, 254, 1)')
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                indexAxis: 'y',
                 scales: {
-                    x: { stacked: true, ticks: { callback: value => value + '%' } },
-                    y: { stacked: true }
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            callback: value => value + '%'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Pourcentage des tâches (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Année'
+                        }
+                    }
                 },
                 plugins: {
+                    legend: { position: 'top' },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
