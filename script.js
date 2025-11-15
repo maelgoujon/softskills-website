@@ -4,20 +4,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initCharts = () => {
         const automationCtx = document.getElementById('automationChart').getContext('2d');
-    // Prévision linéaire jusqu'en 2030
-    const years = [2020, 2025, 2030];
-    // Calcul de la tendance linéaire pour chaque type de tâche
-    // Tâches Humaines : 2020=71, 2025=50
-    // Tâches Automatisées : 2020=29, 2025=50
-    // Slope = (y2-y1)/(x2-x1)
-    const humanSlope = (50-71)/(2025-2020); // -21/5 = -4.2 par an
-    const autoSlope = (50-29)/(2025-2020); // 21/5 = 4.2 par an
-    const humanData = years.map(y => Math.round(71 + (y-2020)*humanSlope));
-    const autoData = years.map(y => Math.round(29 + (y-2020)*autoSlope));
+        // Données réelles et prévisionnelles
+        const years = [2018, 2022, 2025, 2030];
+        // Données réelles
+        const humanReal = [71, 58, 48];
+        const autoReal = [29, 42, 52];
+        // Calcul du coefficient directeur (slope) par régression linéaire sur 3 points
+        function linearRegressionSlope(xs, ys) {
+            const n = xs.length;
+            const meanX = xs.reduce((a, b) => a + b, 0) / n;
+            const meanY = ys.reduce((a, b) => a + b, 0) / n;
+            let num = 0, den = 0;
+            for (let i = 0; i < n; i++) {
+                num += (xs[i] - meanX) * (ys[i] - meanY);
+                den += (xs[i] - meanX) ** 2;
+            }
+            return num / den;
+        }
+
+        const xVals = [2018, 2022, 2025];
+        const humanSlope = linearRegressionSlope(xVals, humanReal);
+        const autoSlope = linearRegressionSlope(xVals, autoReal);
+        // Intercept pour 2025
+        const humanIntercept = humanReal[2] - humanSlope * 2025;
+        const autoIntercept = autoReal[2] - autoSlope * 2025;
+        // Projection 2030
+        const human2030 = Math.round(humanSlope * 2030 + humanIntercept);
+        const auto2030 = Math.round(autoSlope * 2030 + autoIntercept);
+        const humanData = [...humanReal, human2030];
+        const autoData = [...autoReal, auto2030];
 
         // Pour chaque dataset, on sépare la partie réelle (2020-2025) et la projection (2025-2035)
         function buildSegmentStyles(data, color) {
-            // 0:2020, 1:2025, 2:2030
+            // 0:2018, 1:2022, 2:2025, 3:2030
             return {
                 borderColor: color,
                 backgroundColor: color.replace('1)', '0.1)'),
@@ -27,9 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 pointBackgroundColor: color,
                 segment: {
                     borderDash: ctx => {
-                        // ctx.p0DataIndex: index du point de départ du segment
-                        // On veut du plein pour 2020-2025 (0-1), pointillé après (1-2, 2-3)
-                        return ctx.p0DataIndex < 1 ? [] : [8, 6];
+                        // Plein pour les segments réels (2018-2022, 2022-2025), pointillé pour la projection (2025-2030)
+                        return ctx.p0DataIndex < 2 ? [] : [8, 6];
                     }
                 }
             };
